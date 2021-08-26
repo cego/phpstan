@@ -1,18 +1,13 @@
 includes:
-    - ./vendor/nunomaduro/larastan/extension.neon
+    - ./../../nunomaduro/larastan/extension.neon
 
 parameters:
-    level: max
+    level: 7
 
     checkMissingIterableValueType: false
     reportUnmatchedIgnoredErrors: false
 
     ignoreErrors:
-          # Illuminate calls
-          - '#Call to an undefined method Illuminate\\#'
-          - '#Call to an undefined static method Illuminate\\#'
-          - '#Static call to instance method Illuminate\\#'
-
           # Allow illuminate array types in array_merge
           - '#Parameter \#1 ...\$arrays of function array_merge expects array, array|Illuminate\Contracts\Support\Arrayable|JsonSerializable given.#'
 
