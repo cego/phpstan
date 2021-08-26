@@ -1,0 +1,17 @@
+{
+    "name": "cego/phpstan",
+    "description": "Package for a common CEGO PhpStan extension used company wide",
+    "type": "library",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Niki Ewald Zakariassen",
+            "email": "niza@cego.dk"
+        }
+    ],
+    "require": {
+        "nunomaduro/larastan": "^0.7.12"
+    }
+}
