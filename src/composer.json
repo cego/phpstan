@@ -1,0 +1,5 @@
+{
+    "require": {
+        "nunomaduro/larastan": "^0.7.12"
+    }
+}

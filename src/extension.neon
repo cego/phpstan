@@ -1,0 +1,26 @@
+includes:
+    - ./vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+    level: max
+
+    checkMissingIterableValueType: false
+    reportUnmatchedIgnoredErrors: false
+
+    ignoreErrors:
+          # Illuminate calls
+          - '#Call to an undefined method Illuminate\\#'
+          - '#Call to an undefined static method Illuminate\\#'
+          - '#Static call to instance method Illuminate\\#'
+
+          # Allow illuminate array types in array_merge
+          - '#Parameter \#1 ...\$arrays of function array_merge expects array, array|Illuminate\Contracts\Support\Arrayable|JsonSerializable given.#'
+
+          # Allow magic calls on unique generator
+          - '#Access to an undefined property Faker\\UniqueGenerator::#'
+
+          # Allow arrow functions for collecitons
+          - '#Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<mixed\,mixed\>\:\:each\(\) expects callable\(mixed\, mixed\)\: bool\|void, Closure#'
+
+          # Laravel-Ide-Helper integration
+          - '#PHPDoc tag @mixin contains unknown class Eloquent#'
