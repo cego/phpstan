@@ -3,3 +3,19 @@ includes:
 
 parameters:
     level: 8
+
+    reportUnmatchedIgnoredErrors: false
+
+    ignoreErrors:
+          # Allow illuminate array types in array_merge
+          - '#Parameter \#1 ...\$arrays of function array_merge expects array, array|Illuminate\Contracts\Support\Arrayable|JsonSerializable given.#'
+
+          # Allow magic calls on unique generator
+          - '#Access to an undefined property Faker\\UniqueGenerator::#'
+
+          # Allow arrow functions for collecitons
+          - '#Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<mixed\,mixed\>\:\:each\(\) expects callable\(mixed\, mixed\)\: bool\|void, Closure#'
+          - '#Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<.+?\,.+?\>\:\:each\(\) expects callable\(.+?\, .+?\)\:\s?bool\|void, Closure#'
+
+          # Laravel-Ide-Helper integration
+          - '#PHPDoc tag @mixin contains unknown class Eloquent#'
