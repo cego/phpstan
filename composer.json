@@ -12,7 +12,7 @@
         }
     ],
     "require": {
-        "nunomaduro/larastan": "^2.0",
+        "nunomaduro/larastan": "^1.0.3",
         "phpstan/phpstan": "^1.4"
     }
 }
