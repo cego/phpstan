@@ -2,7 +2,7 @@ includes:
     - ./../../nunomaduro/larastan/extension.neon
 
 parameters:
-    level: max
+    level: 8
 
     reportUnmatchedIgnoredErrors: false
 
