@@ -15,7 +15,7 @@ parameters:
 
           # Allow arrow functions for collecitons
           - '#Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<mixed\,mixed\>\:\:each\(\) expects callable\(mixed\, mixed\)\: bool\|void, Closure#'
-          - '#Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<.+?\,.+?\>\:\:each\(\) expects callable\(.+?\, .+?\)\:\s?bool\|void, Closure#'
+          - '#Parameter \#1 \$callback of method Illuminate\\Support\\(Collection|LazyCollection)\<.+?\,.+?\>\:\:(each|reject|transform|map|filter|only)\(\) expects callable\(.+?\, .+?\)\:\s?bool\|void, Closure#'
 
           # Laravel-Ide-Helper integration
           - '#PHPDoc tag @mixin contains unknown class Eloquent#'
