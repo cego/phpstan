@@ -23,5 +23,8 @@ parameters:
           # Allow collection methods on relationship properties
           - '#Cannot call method (each|reject|transform|map|filter|only|except|reduce|count)\(\) on.*Illuminate\\Database\\Eloquent\\Collection#'
 
+          # Ignore relationship generics
+          - '#Generic type Illuminate\\Database\\Eloquent\\Relations\\#'
+
           # Laravel-Ide-Helper integration
           - '#PHPDoc tag @mixin contains unknown class Eloquent#'
