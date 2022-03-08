@@ -20,5 +20,8 @@ parameters:
           # Allow mixed types for collect function
           - '#Unable to resolve the template type (TKey|TValue) in call to function collect#'
 
+          # Allow collection methods on relationship properties
+          - '#Cannot call method (each|reject|transform|map|filter|only|except|reduce)\(\) on.*Illuminate\\Database\\Eloquent\\Collection#'
+
           # Laravel-Ide-Helper integration
           - '#PHPDoc tag @mixin contains unknown class Eloquent#'
