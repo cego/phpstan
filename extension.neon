@@ -15,7 +15,10 @@ parameters:
 
           # Allow arrow functions for collecitons
           - '#Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<mixed\,mixed\>\:\:each\(\) expects callable\(mixed\, mixed\)\: bool\|void, Closure#'
-          - '#Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<.+?\,.+?\>\:\:each\(\) expects callable\(.+?\, .+?\)\:\s?bool\|void, Closure#'
+          - '#Parameter \#1 \$callback of method Illuminate\\Support\\(Collection|LazyCollection).*?\:\:(each|reject|transform|map|filter|only|except|reduce).*?expects.*?(Closure|callable).*?(Closure|callable).*?given#'
+
+          # Allow mixed types for collect function
+          - '#Unable to resolve the template type (TKey|TValue) in call to function collect#'
 
           # Laravel-Ide-Helper integration
           - '#PHPDoc tag @mixin contains unknown class Eloquent#'
