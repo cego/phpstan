@@ -25,6 +25,7 @@ parameters:
 
           # Ignore relationship generics
           - '#Generic type Illuminate\\Database\\Eloquent\\Relations\\#'
+          - '#should return Illuminate\\Database\\Eloquent\\Relations\\.*?but returns.*Illuminate\\Database\\Eloquent\\Relations\\#'
 
           # Laravel-Ide-Helper integration
           - '#PHPDoc tag @mixin contains unknown class Eloquent#'
