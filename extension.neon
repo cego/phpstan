@@ -3,8 +3,8 @@ includes:
 
 parameters:
     level: 8
-
     reportUnmatchedIgnoredErrors: false
+    tmpDir: .phpstan
 
     ignoreErrors:
           # Allow illuminate array types in array_merge
