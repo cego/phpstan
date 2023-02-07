@@ -114,16 +114,20 @@ class ValidTypeRule implements Rule
                 $validType = collect($typeList)
                     ->reduce(fn (bool $result, string $expectedType) => $result && $this->isTypesMatching($actualIntersectionType, $expectedType), true);
 
+                // We found a expected type which matches the current union type, we therefor continue to next union type in the outer loop
                 if ($validType) {
-                    return null;
+                    continue 2;
                 }
             }
+
+            // No valid expected type was found for the union type
+            return RuleErrorBuilder::message(sprintf('Argument $%s for %s::__construct() expects type [%s] but [%s] was given', $key, $call['target'], $this->expectedUnionTypesToString($expectedTypes), $actualType))
+                ->line($call['method']['line'])
+                ->file($call['method']['file'])
+                ->build();
         }
 
-        return RuleErrorBuilder::message(sprintf('Argument $%s for %s::__construct() expects type [%s] but [%s] was given', $key, $call['target'], $this->expectedUnionTypesToString($expectedTypes), $actualType))
-            ->line($call['method']['line'])
-            ->file($call['method']['file'])
-            ->build();
+        return null;
     }
 
     /**
