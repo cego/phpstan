@@ -85,7 +85,7 @@ class FromCollector implements Collector
     private function isNotSpatieLaravelDataFromCall(StaticCall $node, Scope $scope): bool
     {
         if (strtolower($node->name->name) !== 'from') {
-            return false;
+            return true;
         }
 
         return ! is_a($this->getTargetClass($node, $scope), Data::class, true);
