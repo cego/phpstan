@@ -95,7 +95,7 @@ class ValidTypeRule implements Rule
 
     private function checkType(array $call, string $key, string $actualType, array $casts, array $expectedTypes): ?RuleError
     {
-        // Ignore cases, where there exists a cast - since we cannot analyse them in debt
+        // Ignore cases, where there exists a cast - since we cannot analyse them in dept
         if ($this->expectedTypesMatchesExactlyCast($casts, $expectedTypes)) {
             return null;
         }
@@ -105,16 +105,18 @@ class ValidTypeRule implements Rule
             ->map(fn (string $type) => explode('&', $type))
             ->all();
 
-        foreach ($expectedTypes as $typeList) {
-            if (empty($typeList)) {
-                return null;
-            }
+        foreach ($actualTypeParts as $actualTypePart) {
+            foreach ($expectedTypes as $typeList) {
+                if (empty($typeList)) {
+                    return null;
+                }
 
-            $validType = collect($typeList)
-                ->reduce(fn (bool $result, string $expectedType) => $result && $this->isTypesMatching($actualTypeParts, $expectedType), true);
+                $validType = collect($typeList)
+                    ->reduce(fn (bool $result, string $expectedType) => $result && $this->isTypesMatching($actualTypePart, $expectedType), true);
 
-            if ($validType) {
-                return null;
+                if ($validType) {
+                    return null;
+                }
             }
         }
 
@@ -162,22 +164,10 @@ class ValidTypeRule implements Rule
         return collect($expectedTypes)->implode('&');
     }
 
-    private function isTypesMatching(array $actualTypeParts, string $parentType): bool
+    private function isTypesMatching(array $intersectionType, string $parentType): bool
     {
-        if ($parentType === 'mixed') {
-            return true;
-        }
-
-        foreach ($actualTypeParts as $intersectionType) {
-            $typeMatches = collect($intersectionType)
-                ->reduce(fn (bool $result, string $type) => $result || $this->typeIsSubsetOf($type, $parentType), false);
-
-            if (! $typeMatches) {
-                 return false;
-            }
-        }
-
-        return true;
+        return collect($intersectionType)
+            ->reduce(fn (bool $result, string $type) => $result || $this->typeIsSubsetOf($type, $parentType), false);
     }
 
     private function typeIsSubsetOf(string $actualType, string $parentType): bool
