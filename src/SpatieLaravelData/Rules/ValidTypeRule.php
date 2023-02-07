@@ -105,14 +105,14 @@ class ValidTypeRule implements Rule
             ->map(fn (string $type) => explode('&', $type))
             ->all();
 
-        foreach ($actualTypeParts as $actualTypePart) {
+        foreach ($actualTypeParts as $actualIntersectionType) {
             foreach ($expectedTypes as $typeList) {
                 if (empty($typeList)) {
                     return null;
                 }
 
                 $validType = collect($typeList)
-                    ->reduce(fn (bool $result, string $expectedType) => $result && $this->isTypesMatching($actualTypePart, $expectedType), true);
+                    ->reduce(fn (bool $result, string $expectedType) => $result && $this->isTypesMatching($actualIntersectionType, $expectedType), true);
 
                 if ($validType) {
                     return null;
