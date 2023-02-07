@@ -6,6 +6,7 @@ use PhpParser\Node;
 use PHPStan\Rules\Rule;
 use PHPStan\Analyser\Scope;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use PHPStan\Rules\RuleError;
 use Illuminate\Support\Collection;
 use PHPStan\Node\CollectedDataNode;
@@ -99,13 +100,18 @@ class ValidTypeRule implements Rule
             return null;
         }
 
+        $actualTypeParts = Str::of($actualType)
+            ->explode('|')
+            ->map(fn (string $type) => explode('&', $type))
+            ->all();
+
         foreach ($expectedTypes as $typeList) {
             if (empty($typeList)) {
                 return null;
             }
 
             $validType = collect($typeList)
-                ->reduce(fn (bool $result, string $expectedType) => $result && $this->isTypesMatching($actualType, $expectedType), true);
+                ->reduce(fn (bool $result, string $expectedType) => $result && $this->isTypesMatching($actualTypeParts, $expectedType), true);
 
             if ($validType) {
                 return null;
@@ -156,7 +162,25 @@ class ValidTypeRule implements Rule
         return collect($expectedTypes)->implode('&');
     }
 
-    private function isTypesMatching(string $actualType, string $parentType): bool
+    private function isTypesMatching(array $actualTypeParts, string $parentType): bool
+    {
+        if ($parentType === 'mixed') {
+            return true;
+        }
+
+        foreach ($actualTypeParts as $intersectionType) {
+            $typeMatches = collect($intersectionType)
+                ->reduce(fn (bool $result, string $type) => $result || $this->typeIsSubsetOf($type, $parentType), true);
+
+            if ($typeMatches) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function typeIsSubsetOf(string $actualType, string $parentType): bool
     {
         if ($parentType === 'mixed') {
             return true;
@@ -166,9 +190,8 @@ class ValidTypeRule implements Rule
             return true;
         }
 
-        // We do not currently support static analysis for
-        if (class_exists($actualType) && class_exists($parentType)) {
-            return is_a($actualType, $parentType, true);
+        if (is_a($actualType, $parentType, true)) {
+            return true;
         }
 
         return false;
