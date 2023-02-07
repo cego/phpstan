@@ -170,7 +170,7 @@ class ValidTypeRule implements Rule
 
         foreach ($actualTypeParts as $intersectionType) {
             $typeMatches = collect($intersectionType)
-                ->reduce(fn (bool $result, string $type) => $result || $this->typeIsSubsetOf($type, $parentType), true);
+                ->reduce(fn (bool $result, string $type) => $result || $this->typeIsSubsetOf($type, $parentType), false);
 
             if ($typeMatches) {
                 return true;
