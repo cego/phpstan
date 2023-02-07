@@ -172,12 +172,12 @@ class ValidTypeRule implements Rule
             $typeMatches = collect($intersectionType)
                 ->reduce(fn (bool $result, string $type) => $result || $this->typeIsSubsetOf($type, $parentType), false);
 
-            if ($typeMatches) {
-                return true;
+            if (! $typeMatches) {
+                 return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     private function typeIsSubsetOf(string $actualType, string $parentType): bool
