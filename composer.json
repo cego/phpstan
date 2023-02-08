@@ -11,8 +11,24 @@
             "email": "niza@cego.dk"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "Cego\\phpstan\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Test\\": "test/"
+        }
+    },
     "require": {
-        "nunomaduro/larastan": "^2.1",
-        "phpstan/phpstan": "^1.4"
+        "php": "^8.1",
+        "phpstan/phpstan": "^1.4",
+        "nunomaduro/larastan": "^2.4",
+        "spatie/laravel-data": "^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "cego/php-cs-fixer": "^1.0"
     }
 }

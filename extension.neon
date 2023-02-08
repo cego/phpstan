@@ -1,6 +1,25 @@
 includes:
     - ./../../nunomaduro/larastan/extension.neon
 
+services:
+	-
+		class: Cego\phpstan\SpatieLaravelData\Collectors\ConstructorCollector
+		tags:
+			- phpstan.collector
+
+	-
+		class: Cego\phpstan\SpatieLaravelData\Collectors\FromCollector
+		tags:
+			- phpstan.collector
+
+	-
+		class: Cego\phpstan\SpatieLaravelData\Collectors\CastCollector
+		tags:
+			- phpstan.collector
+
+rules:
+    - Cego\phpstan\SpatieLaravelData\Rules\ValidTypeRule
+
 parameters:
     level: 8
     reportUnmatchedIgnoredErrors: false
