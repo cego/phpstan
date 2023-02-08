@@ -3,16 +3,24 @@
 namespace Cego\phpstan\TypeSystem;
 
 use Stringable;
+use Illuminate\Support\Str;
 
 class Type implements Stringable
 {
+    public readonly string $type;
+
     /**
      * Constructor
      *
      * @param string $type
      */
-    public function __construct(public readonly string $type)
+    public function __construct(string $type)
     {
+        if (empty($type)) {
+            $this->type = 'mixed';
+        } else {
+            $this->type = Str::of($type)->replaceMatches('/<[^<>]*>/', '')->toString();
+        }
     }
 
     /**
@@ -32,8 +40,7 @@ class Type implements Stringable
      */
     public function isMixed(): bool
     {
-        return empty($this->type)
-        || strtolower($this->type) === 'mixed';
+        return strtolower($this->type) === 'mixed';
     }
 
     /**

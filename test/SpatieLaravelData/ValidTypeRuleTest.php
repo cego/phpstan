@@ -78,6 +78,14 @@ class ValidTypeRuleTest extends RuleTestCase
         ], []);
     }
 
+    /** @test */
+    public function it_does_not_care_about_generics(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../Samples/GenericsSpatieLaravelData.php',
+        ], []);
+    }
+
     private function expectError(int $line, string $property, string $class, string $expectedType, string $actualType): array
     {
         return [
