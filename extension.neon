@@ -1,5 +1,5 @@
-includes:
-    - ./../../nunomaduro/larastan/extension.neon
+#includes:
+#    - ./../../nunomaduro/larastan/extension.neon
 
 services:
 	-

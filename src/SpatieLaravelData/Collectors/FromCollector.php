@@ -10,6 +10,10 @@ use PHPStan\Type\VerbosityLevel;
 use PHPStan\Collectors\Collector;
 use PhpParser\Node\Expr\StaticCall;
 use PHPStan\Type\ConstantScalarType;
+use Cego\phpstan\TypeSystem\UnionType;
+use Cego\phpstan\SpatieLaravelData\Data\Call;
+use Cego\phpstan\SpatieLaravelData\Data\Method;
+use Cego\phpstan\SpatieLaravelData\Data\KeyTypePair;
 
 /**
  * @implements Collector<StaticCall, array<string, array<int, string>>
@@ -30,9 +34,10 @@ class FromCollector implements Collector
      * Process the nodes and stores value in the collector instance
      *
      * @phpstan-param StaticCall $node
-     * @return array<string, array<int, string>|null Collected data
+     *
+     * @return string|null Collected data
      */
-    public function processNode(Node $node, Scope $scope): ?array
+    public function processNode(Node $node, Scope $scope): ?string
     {
         if ( ! $node instanceof StaticCall) {
             return null;
@@ -63,25 +68,33 @@ class FromCollector implements Collector
                 $type = $scope->getType($item->value);
 
                 if ($type instanceof ConstantScalarType) {
-                    $argData[$item->key->value] = get_debug_type($type->getValue());
+                    $argData[] = new KeyTypePair($item->key->value, UnionType::fromString(get_debug_type($type->getValue())));
                 } else {
-                    $argData[$item->key->value] = $scope->getType($item->value)->describe(VerbosityLevel::typeOnly());
+                    $argData[] = new KeyTypePair($item->key->value, UnionType::fromString($scope->getType($item->value)->describe(VerbosityLevel::typeOnly())));
                 }
             }
 
             $types[] = $argData;
         }
 
-        return [
-            'types'  => $types,
-            'target' => $this->getTargetClass($node, $scope),
-            'method' => [
-                'file' => $scope->getFile(),
-                'line' => $node->getLine(),
-            ],
-        ];
+        return serialize(new Call(
+            $this->getTargetClass($node, $scope),
+            $types,
+            new Method(
+                $scope->getFile(),
+                $node->getLine(),
+            )
+        ));
     }
 
+    /**
+     * Returns true if the given node is not a laravel data class static ::From call
+     *
+     * @param StaticCall $node
+     * @param Scope $scope
+     *
+     * @return bool
+     */
     private function isNotSpatieLaravelDataFromCall(StaticCall $node, Scope $scope): bool
     {
         if (strtolower($node->name->name) !== 'from') {
@@ -91,6 +104,14 @@ class FromCollector implements Collector
         return ! is_a($this->getTargetClass($node, $scope), Data::class, true);
     }
 
+    /**
+     * Returns the target / result class of the given static call
+     *
+     * @param StaticCall $node
+     * @param Scope $scope
+     *
+     * @return string
+     */
     private function getTargetClass(StaticCall $node, Scope $scope)
     {
         if ($node->class instanceof Node\Expr) {

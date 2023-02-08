@@ -5,19 +5,23 @@ namespace Cego\phpstan\SpatieLaravelData\Rules;
 use PhpParser\Node;
 use PHPStan\Rules\Rule;
 use PHPStan\Analyser\Scope;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use PHPStan\Rules\RuleError;
-use Illuminate\Support\Collection;
 use PHPStan\Node\CollectedDataNode;
 use PHPStan\Rules\RuleErrorBuilder;
-use Cego\phpstan\SpatieLaravelData\Collectors\FromCollector;
+use PHPStan\ShouldNotHappenException;
+use Cego\phpstan\TypeSystem\UnionType;
+use Cego\phpstan\TypeSystem\TypeSystem;
+use Cego\phpstan\SpatieLaravelData\Data\Call;
+use Cego\phpstan\SpatieLaravelData\Data\Constructor;
 use Cego\phpstan\SpatieLaravelData\Collectors\CastCollector;
+use Cego\phpstan\SpatieLaravelData\Collectors\FromCollector;
 use Cego\phpstan\SpatieLaravelData\Collectors\ConstructorCollector;
 
 class ValidTypeRule implements Rule
 {
     /**
+     * Returns the node type this rule should trigger for
+     *
      * @phpstan-return class-string<TNodeType>
      */
     public function getNodeType(): string
@@ -26,7 +30,10 @@ class ValidTypeRule implements Rule
     }
 
     /**
+     * Processes the given node
+     *
      * @phpstan-param TNodeType $node
+     *
      * @return (string|RuleError)[] errors
      */
     public function processNode(Node $node, Scope $scope): array
@@ -35,39 +42,54 @@ class ValidTypeRule implements Rule
             return [];
         }
 
-        $fromCollector = $node->get(FromCollector::class);
-
         $castCollector = collect($node->get(CastCollector::class))
-            ->map(fn (array $castTypes) => $this->convertTypeListToString($castTypes[0]))
-            ->flip()
+            ->flatten()
+            ->map(UnionType::fromString(...))
+            ->reject(fn (UnionType $unionType) => $unionType->isMixed())
+            ->values()
             ->all();
 
         $classCollector = collect($node->get(ConstructorCollector::class))
-            ->mapWithKeys(fn (array $data) => [$data[0]['class'] => $data[0]['properties']])                        // Outer key by class name
-            ->map(fn (array $data) => collect($data)->mapWithKeys(fn (array $properties) => $properties)->all())    // Inner key by property name
+            ->flatten(1)
+            ->map(Constructor::unserialize(...))
+            ->keyBy('class')
             ->all();
 
-        foreach ($fromCollector as $calls) {
-            foreach ($calls as $call) {
-                $errors[] = $this->compareTypes($call, $castCollector, $classCollector[$call['target']]);
-            }
-        }
-
-        return Arr::flatten($errors);
+        return collect($node->get(FromCollector::class))
+            // Flatten from a list of calls pr. file, to just a list of calls.
+            ->flatten(1)
+            ->map(Call::unserialize(...))
+            // Check each call for errors
+            ->map(fn (Call $call) => $this->compareTypes($call, $castCollector, $classCollector[$call->target]))
+            // Flatten from a list of errors pr. call, to just a list of errors.
+            ->flatten()
+            // To array, so PhpStan can serialize the data.
+            ->all();
     }
 
-    private function compareTypes(array $call, array $casts, array $constructor): array
+    /**
+     * Compares the types of the specific call, with the constructor which would be expected
+     *
+     * @param Call $call
+     * @param list<UnionType> $casts
+     * @param Constructor $constructor
+     *
+     * @throws ShouldNotHappenException
+     *
+     * @return array
+     */
+    private function compareTypes(Call $call, array $casts, Constructor $constructor): array
     {
         $errors = [];
 
-        foreach ($call['types'] as $arrayList) {
-            foreach ($arrayList as $key => $type) {
+        foreach ($call->arrayArguments as $arrayList) {
+            foreach ($arrayList as $type) {
                 // Ignore any additional data, since it does not matter
-                if (! isset($constructor[$key])) {
+                if ( ! isset($constructor->properties[$type->key])) {
                     continue;
                 }
 
-                $error = $this->checkType($call, $key, $type, $casts, $constructor[$key]);
+                $error = $this->checkType($call, $type->key, $type->type, $casts, $constructor->properties[$type->key]->type);
 
                 if ($error !== null) {
                     $errors[] = $error;
@@ -79,51 +101,29 @@ class ValidTypeRule implements Rule
     }
 
     /**
-     * @param array<int, array<int, string>> $typeList
+     * Checks the specific type for a single key, with the expected types of that key.
      *
-     * @return string
+     * @param Call $call
+     * @param string $key
+     * @param UnionType $actualType
+     * @param list<UnionType> $casts
+     * @param UnionType $expectedType
+     *
+     * @throws ShouldNotHappenException
+     *
+     * @return RuleError|null
      */
-    private function convertTypeListToString(array $typeList): string
-    {
-        return collect($typeList)
-            // Sort the individual types within each intersection type and implode them.
-            ->map(fn (array $intersectionList) => ltrim(collect($intersectionList)->sort()->implode('&'), '\\'))
-            // Then sort the full intersection types, and implode them.
-            ->sort()
-            ->implode('|');
-    }
-
-    private function checkType(array $call, string $key, string $actualType, array $casts, array $expectedTypes): ?RuleError
+    private function checkType(Call $call, string $key, UnionType $actualType, array $casts, UnionType $expectedType): ?RuleError
     {
         // Ignore cases, where there exists a cast - since we cannot analyse them in dept
-        if ($this->expectedTypesMatchesExactlyCast($casts, $expectedTypes)) {
+        if ($this->expectedTypesMatchesExactlyCast($casts, $expectedType)) {
             return null;
         }
 
-        $actualTypeParts = Str::of($actualType)
-            ->explode('|')
-            ->map(fn (string $type) => explode('&', $type))
-            ->all();
-
-        foreach ($actualTypeParts as $actualIntersectionType) {
-            foreach ($expectedTypes as $typeList) {
-                if (empty($typeList)) {
-                    return null;
-                }
-
-                $validType = collect($typeList)
-                    ->reduce(fn (bool $result, string $expectedType) => $result && $this->isTypesMatching($actualIntersectionType, $expectedType), true);
-
-                // We found a expected type which matches the current union type, we therefor continue to next union type in the outer loop
-                if ($validType) {
-                    continue 2;
-                }
-            }
-
-            // No valid expected type was found for the union type
-            return RuleErrorBuilder::message(sprintf('Argument $%s for %s::__construct() expects type [%s] but [%s] was given', $key, $call['target'], $this->expectedUnionTypesToString($expectedTypes), $actualType))
-                ->line($call['method']['line'])
-                ->file($call['method']['file'])
+        if ( ! TypeSystem::isSubtypeOf($actualType, $expectedType)) {
+            return RuleErrorBuilder::message(self::getErrorMessage($key, $call->target, $expectedType, $actualType))
+                ->line($call->method->line)
+                ->file($call->method->file)
                 ->build();
         }
 
@@ -131,61 +131,34 @@ class ValidTypeRule implements Rule
     }
 
     /**
-     * Returns true if a cast exists exactly for the expected types.
+     * Returns the error message to give the developer on errors
      *
-     * @param array $casts
-     * @param array $expectedTypes
-     *
-     * @return bool
-     */
-    private function expectedTypesMatchesExactlyCast(array $casts, array $expectedTypes): bool
-    {
-        return isset($casts[$this->convertTypeListToString($expectedTypes)]);
-    }
-
-    /**
-     * @param array<int, array<int, string>> $expectedTypes
+     * @param string $property
+     * @param string $class
+     * @param string $expectedType
+     * @param string $actualType
      *
      * @return string
      */
-    private function expectedUnionTypesToString(array $expectedTypes): string
+    public static function getErrorMessage(string $property, string $class, string $expectedType, string $actualType): string
     {
-        if (empty($expectedTypes)) {
-            return '';
-        }
-
-        $typeAsString = '';
-
-        foreach ($expectedTypes as $expectedType) {
-            $typeAsString .= '|'. $this->expectedIntersectionTypesToString($expectedType);
-        }
-
-        return ltrim($typeAsString, '|');
+        return sprintf('Argument $%s for %s::__construct() expects type [%s] but [%s] was given', $property, $class, $expectedType, $actualType);
     }
 
-    private function expectedIntersectionTypesToString(array $expectedTypes): string
+    /**
+     * Returns true if a cast exists exactly for the expected types.
+     *
+     * @param list<UnionType> $casts
+     * @param UnionType $expectedTypes
+     *
+     * @return bool
+     */
+    private function expectedTypesMatchesExactlyCast(array $casts, UnionType $expectedTypes): bool
     {
-        return collect($expectedTypes)->implode('&');
-    }
-
-    private function isTypesMatching(array $intersectionType, string $parentType): bool
-    {
-        return collect($intersectionType)
-            ->reduce(fn (bool $result, string $type) => $result || $this->typeIsSubsetOf($type, $parentType), false);
-    }
-
-    private function typeIsSubsetOf(string $actualType, string $parentType): bool
-    {
-        if ($parentType === 'mixed') {
-            return true;
-        }
-
-        if ($actualType === $parentType) {
-            return true;
-        }
-
-        if (is_a($actualType, $parentType, true)) {
-            return true;
+        foreach ($casts as $castType) {
+            if (TypeSystem::isSubtypeOf($expectedTypes, $castType)) {
+                return true;
+            }
         }
 
         return false;

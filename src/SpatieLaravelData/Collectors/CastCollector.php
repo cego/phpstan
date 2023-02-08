@@ -3,15 +3,16 @@
 namespace Cego\phpstan\SpatieLaravelData\Collectors;
 
 use PhpParser\Node;
-use PHPStan\Analyser\Scope;
 use Illuminate\Support\Str;
+use PHPStan\Analyser\Scope;
 use PHPStan\Type\VerbosityLevel;
 use PHPStan\Collectors\Collector;
-use Spatie\LaravelData\Casts\Cast;
 use Illuminate\Support\Collection;
+use Spatie\LaravelData\Casts\Cast;
 use PhpParser\Node\Expr\StaticCall;
 use PHPStan\Node\InClassMethodNode;
 use PHPStan\ShouldNotHappenException;
+use Cego\phpstan\TypeSystem\UnionType;
 use Spatie\LaravelData\Casts\Uncastable;
 use PHPStan\Reflection\ParametersAcceptorSelector;
 
@@ -34,10 +35,12 @@ class CastCollector implements Collector
      * Process the nodes and stores value in the collector instance
      *
      * @phpstan-param StaticCall $node
-     * @return array<int, array<int, string>|null Collected data
+     *
      * @throws ShouldNotHappenException
+     *
+     * @return string|null Collected data
      */
-    public function processNode(Node $node, Scope $scope): ?array
+    public function processNode(Node $node, Scope $scope): ?string
     {
         // Skip wrong nodes
         if ( ! $node instanceof InClassMethodNode) {
@@ -68,15 +71,15 @@ class CastCollector implements Collector
 
                 // We only support intersection types of explicit classes / interfaces.
                 if ($intersectionTypes->count() !== $classTypes->count()) {
-                    return collect();
+                    return [];
                 }
 
-                return $classTypes;
+                return $classTypes->all();
             })
             // Remove any intersection types we have deemed unfit
-            ->reject(fn (Collection $collection) => $collection->isEmpty())
-            // And array the result so it can be serialized by PhpStan
-            ->toArray();
+            ->reject(fn (array $collection) => empty($collection))
+            ->pipe(UnionType::fromRaw(...))
+            ->toString();
     }
 
     /**

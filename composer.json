@@ -22,11 +22,13 @@
         }
     },
     "require": {
-        "php": "^7.4|^8.0",
-        "nunomaduro/larastan": "^2.1",
-        "phpstan/phpstan": "^1.4"
+        "php": "^8.1"
     },
     "require-dev": {
-        "spatie/laravel-data": "^3.0"
+        "spatie/laravel-data": "^3.0",
+        "phpunit/phpunit": "^10.0",
+        "phpstan/phpstan": "^1.4",
+        "nunomaduro/larastan": "^2.4",
+        "cego/php-cs-fixer": "^1.0"
     }
 }
