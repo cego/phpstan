@@ -19,7 +19,7 @@ class Type implements Stringable
         if (empty($type)) {
             $this->type = 'mixed';
         } else {
-            $this->type = Str::of($type)->replaceMatches('/<[^<>]*>/', '')->toString();
+            $this->type = Str::of($type)->replaceMatches('/<.*>/', '')->toString();
         }
     }
 
