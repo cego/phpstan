@@ -78,19 +78,36 @@ class IntersectionType implements Stringable
     }
 
     /**
+     * Returns true if the type is considered to accept "null"
+     *
+     * @return bool
+     */
+    public function isNullable(): bool
+    {
+        // An intersection type is mixed, if any of the types are considered nullable.
+        foreach ($this->types as $type) {
+            if ($type->isNull()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Returns true if the type is considered to accept "mixed"
      *
      * @return bool
      */
     public function isMixed(): bool
     {
-        // An intersection type is mixed, if all the types are considered mixed.
+        // An intersection type is mixed, if any of the types are considered mixed.
         foreach ($this->types as $type) {
-            if ( ! $type->isMixed()) {
-                return false;
+            if ($type->isMixed()) {
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 }

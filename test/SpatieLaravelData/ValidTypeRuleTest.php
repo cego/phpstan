@@ -4,9 +4,11 @@ namespace Test\SpatieLaravelData;
 
 use PHPStan\Rules\Rule;
 use PHPStan\Testing\RuleTestCase;
+use Test\Samples\Enum\BackedEnumExample;
 use Test\Samples\InvalidScalarSpatieLaravelData;
 use Test\Samples\InvalidComplexSpatieLaravelData;
 use Cego\phpstan\SpatieLaravelData\Rules\ValidTypeRule;
+use Test\Samples\InvalidNullableCastedSpatieLaravelData;
 use Cego\phpstan\SpatieLaravelData\Collectors\CastCollector;
 use Cego\phpstan\SpatieLaravelData\Collectors\FromCollector;
 use Cego\phpstan\SpatieLaravelData\Collectors\ConstructorCollector;
@@ -64,7 +66,7 @@ class ValidTypeRuleTest extends RuleTestCase
             $this->expectError(20, 'nullableTypeStringProperty', InvalidComplexSpatieLaravelData::class, 'null|string', 'float'),
             $this->expectError(20, 'nullableMarkStringProperty', InvalidComplexSpatieLaravelData::class, 'null|string', 'array'),
             $this->expectError(20, 'nullableTypeStringProperty', InvalidComplexSpatieLaravelData::class, 'null|string', 'array'),
-            $this->expectError(20, 'intersectionProperty', InvalidComplexSpatieLaravelData::class, '\Spatie\LaravelData\Casts\Cast&\Stringable', 'stdClass'),
+            $this->expectError(20, 'intersectionProperty', InvalidComplexSpatieLaravelData::class, 'Spatie\LaravelData\Casts\Cast&Stringable', 'stdClass'),
         ]);
     }
 
@@ -76,6 +78,18 @@ class ValidTypeRuleTest extends RuleTestCase
             __DIR__ . '/../Samples/Casts/BackedEnumCast.php',
             __DIR__ . '/../Samples/Casts/UncastableSpatieDataCast.php',
         ], []);
+    }
+
+    /** @test */
+    public function it_does_not_ignore_null_check_for_casted_types(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../Samples/InvalidNullableCastedSpatieLaravelData.php',
+            __DIR__ . '/../Samples/Casts/BackedEnumCast.php',
+            __DIR__ . '/../Samples/Casts/UncastableSpatieDataCast.php',
+        ], [
+            $this->expectError(17, 'castedProperty', InvalidNullableCastedSpatieLaravelData::class, BackedEnumExample::class, 'null'),
+        ]);
     }
 
     /** @test */

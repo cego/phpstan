@@ -14,33 +14,6 @@ class CastedSpatieLaravelData extends Data
 
     public function initDefault(): self
     {
-        self::from(
-            [
-                'castedProperty' => 'hello world', // A cast exists, so we don't actually know if this is legal or not
-            ],
-            [
-                'castedProperty' => 123,          // A cast exists, so we don't actually know if this is legal or not | Maybe the cast converts the int into a string :shrug:
-            ],
-        );
-
-        self::from(
-            [
-                'castedProperty' => 'hello world', // A cast exists, so we don't actually know if this is legal or not
-            ],
-            [
-                'castedProperty' => 123,          // A cast exists, so we don't actually know if this is legal or not | Maybe the cast converts the int into a string :shrug:
-            ],
-        );
-
-        self::from(
-            [
-                'castedProperty' => 'hello world', // A cast exists, so we don't actually know if this is legal or not
-            ],
-            [
-                'castedProperty' => 123,          // A cast exists, so we don't actually know if this is legal or not | Maybe the cast converts the int into a string :shrug:
-            ],
-        );
-
         return self::from(
             [
                 'castedProperty' => 'hello world', // A cast exists, so we don't actually know if this is legal or not
