@@ -115,20 +115,44 @@ class ValidTypeRule implements Rule
      */
     private function checkType(Call $call, string $key, UnionType $actualType, array $casts, UnionType $expectedType): ?RuleError
     {
-        // Ignore cases, where there exists a cast - since we cannot analyse them in dept
+        // Casters cannot cast nullable values, so quick test for type error
+        // is simply to check if the expected type accepts null values or not.
+        if ($actualType->isNullable() && $expectedType->isNotNullable()) {
+            return $this->buildError($call, $key, $expectedType, $actualType);
+        }
+
+        // Otherwise, ignore cases where there exists a cast - since we cannot analyse them in dept.
         if ($this->expectedTypesMatchesExactlyCast($casts, $expectedType)) {
             return null;
         }
 
+        // Run full type inspection and return any errors found.
         if ( ! TypeSystem::isSubtypeOf($actualType, $expectedType)) {
-            return RuleErrorBuilder::message(self::getErrorMessage($key, $call->target, $expectedType, $actualType))
-                ->line($call->method->line)
-                ->file($call->method->file)
-                ->tip('This is a custom CEGO rule, if you found a bug fix it in the cego/phpstan project')
-                ->build();
+            return $this->buildError($call, $key, $expectedType, $actualType);
         }
 
         return null;
+    }
+
+    /**
+     * Builds a RuleError instance
+     *
+     * @param Call $call
+     * @param string $key
+     * @param string $expectedType
+     * @param string $actualType
+     *
+     * @throws ShouldNotHappenException
+     *
+     * @return RuleError
+     */
+    private function buildError(Call $call, string $key, string $expectedType, string $actualType): RuleError
+    {
+        return RuleErrorBuilder::message(self::getErrorMessage($key, $call->target, $expectedType, $actualType))
+            ->line($call->method->line)
+            ->file($call->method->file)
+            ->tip('This is a custom CEGO rule, if you found a bug fix it in the cego/phpstan project')
+            ->build();
     }
 
     /**

@@ -34,6 +34,16 @@ class Type implements Stringable
     }
 
     /**
+     * Returns true if the type is null
+     *
+     * @return bool
+     */
+    public function isNull(): bool
+    {
+        return strtolower($this->type) === 'null';
+    }
+
+    /**
      * Returns true if the type is of mixed
      *
      * @return bool
@@ -136,7 +146,7 @@ class Type implements Stringable
     public function __toString(): string
     {
         if ($this->isClassOrInterface()) {
-            return $this->type;
+            return ltrim($this->type, '\\');
         }
 
         // Handles when empty string == mixed

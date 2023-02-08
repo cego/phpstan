@@ -42,6 +42,33 @@ class UnionType implements \Stringable
         );
     }
 
+    /**
+     * Returns true if the type is nullable
+     *
+     * @return bool
+     */
+    public function isNullable(): bool
+    {
+        // A union type is nullable, if just one of the types are nullable
+        foreach ($this->intersectionTypes as $type) {
+            if ($type->isNullable()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the type is not nullable
+     *
+     * @return bool
+     */
+    public function isNotNullable(): bool
+    {
+        return ! $this->isNullable();
+    }
+
     public function isMixed(): bool
     {
         // A union type is mixed, if just one of the types are considered mixed
