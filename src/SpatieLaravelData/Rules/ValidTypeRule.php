@@ -124,6 +124,7 @@ class ValidTypeRule implements Rule
             return RuleErrorBuilder::message(self::getErrorMessage($key, $call->target, $expectedType, $actualType))
                 ->line($call->method->line)
                 ->file($call->method->file)
+                ->tip('This is a custom CEGO rule, if you found a bug fix it in the cego/phpstan project')
                 ->build();
         }
 

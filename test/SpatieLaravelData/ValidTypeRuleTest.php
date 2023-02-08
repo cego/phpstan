@@ -49,10 +49,10 @@ class ValidTypeRuleTest extends RuleTestCase
     public function it_returns_errors_for_invalid_scalar_data(): void
     {
         $this->analyse([__DIR__ . '/../Samples/InvalidScalarSpatieLaravelData.php'], [
-            $this->expectError(21, 'stringProperty', InvalidScalarSpatieLaravelData::class, 'string', 'null'),
-            $this->expectError(21, 'intProperty', InvalidScalarSpatieLaravelData::class, 'int', 'float'),
-            $this->expectError(21, 'booleanProperty', InvalidScalarSpatieLaravelData::class, 'bool', 'array'),
-            $this->expectError(21, 'floatProperty', InvalidScalarSpatieLaravelData::class, 'float', 'string'),
+            $this->expectError(19, 'stringProperty', InvalidScalarSpatieLaravelData::class, 'string', 'null'),
+            $this->expectError(19, 'intProperty', InvalidScalarSpatieLaravelData::class, 'int', 'float'),
+            $this->expectError(19, 'booleanProperty', InvalidScalarSpatieLaravelData::class, 'bool', 'array'),
+            $this->expectError(19, 'floatProperty', InvalidScalarSpatieLaravelData::class, 'float', 'string'),
         ]);
     }
 
@@ -60,11 +60,11 @@ class ValidTypeRuleTest extends RuleTestCase
     public function it_returns_errors_for_invalid_complex_data(): void
     {
         $this->analyse([__DIR__ . '/../Samples/InvalidComplexSpatieLaravelData.php'], [
-            $this->expectError(21, 'nullableMarkStringProperty', InvalidComplexSpatieLaravelData::class, 'null|string', 'int'),
-            $this->expectError(21, 'nullableTypeStringProperty', InvalidComplexSpatieLaravelData::class, 'null|string', 'float'),
-            $this->expectError(21, 'nullableMarkStringProperty', InvalidComplexSpatieLaravelData::class, 'null|string', 'array'),
-            $this->expectError(21, 'nullableTypeStringProperty', InvalidComplexSpatieLaravelData::class, 'null|string', 'array'),
-            $this->expectError(21, 'intersectionProperty', InvalidComplexSpatieLaravelData::class, '\Spatie\LaravelData\Casts\Cast&\Stringable', 'stdClass'),
+            $this->expectError(20, 'nullableMarkStringProperty', InvalidComplexSpatieLaravelData::class, 'null|string', 'int'),
+            $this->expectError(20, 'nullableTypeStringProperty', InvalidComplexSpatieLaravelData::class, 'null|string', 'float'),
+            $this->expectError(20, 'nullableMarkStringProperty', InvalidComplexSpatieLaravelData::class, 'null|string', 'array'),
+            $this->expectError(20, 'nullableTypeStringProperty', InvalidComplexSpatieLaravelData::class, 'null|string', 'array'),
+            $this->expectError(20, 'intersectionProperty', InvalidComplexSpatieLaravelData::class, '\Spatie\LaravelData\Casts\Cast&\Stringable', 'stdClass'),
         ]);
     }
 
@@ -91,6 +91,7 @@ class ValidTypeRuleTest extends RuleTestCase
         return [
             ValidTypeRule::getErrorMessage($property, $class, $expectedType, $actualType),
             $line,
+            'This is a custom CEGO rule, if you found a bug fix it in the cego/phpstan project',
         ];
     }
 }
