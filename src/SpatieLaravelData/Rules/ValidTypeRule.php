@@ -10,6 +10,7 @@ use PHPStan\Node\CollectedDataNode;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\ShouldNotHappenException;
 use Cego\phpstan\TypeSystem\UnionType;
+use Spatie\LaravelData\DataCollection;
 use Cego\phpstan\TypeSystem\TypeSystem;
 use Cego\phpstan\SpatieLaravelData\Data\Call;
 use Cego\phpstan\SpatieLaravelData\Data\Constructor;
@@ -180,7 +181,9 @@ class ValidTypeRule implements Rule
      */
     private function expectedTypesMatchesExactlyCast(array $casts, UnionType $expectedTypes): bool
     {
-        foreach ($casts as $castType) {
+        $systemCasts = [UnionType::fromString(DataCollection::class)];
+
+        foreach ([...$casts, ...$systemCasts] as $castType) {
             if (TypeSystem::isSubtypeOf($expectedTypes, $castType)) {
                 return true;
             }

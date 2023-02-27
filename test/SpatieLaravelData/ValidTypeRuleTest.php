@@ -100,6 +100,14 @@ class ValidTypeRuleTest extends RuleTestCase
         ], []);
     }
 
+    /** @test */
+    public function it_accepts_arrays_for_data_collections(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../Samples/DataCollectionSpatieLaravelData.php',
+        ], []);
+    }
+
     private function expectError(int $line, string $property, string $class, string $expectedType, string $actualType): array
     {
         return [
