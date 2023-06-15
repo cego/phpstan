@@ -60,6 +60,8 @@ class ValidTypeRule implements Rule
             // Flatten from a list of calls pr. file, to just a list of calls.
             ->flatten(1)
             ->map(Call::unserialize(...))
+            // Make sure the rule does not crash in case a specific data class has not been analyzed - This can happen with data classes in the vendor folder
+            ->filter(fn (Call $call) => isset($classCollector[$call->target]))
             // Check each call for errors
             ->map(fn (Call $call) => $this->compareTypes($call, $castCollector, $classCollector[$call->target]))
             // Flatten from a list of errors pr. call, to just a list of errors.
