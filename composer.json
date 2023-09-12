@@ -11,11 +11,6 @@
             "email": "niza@cego.dk"
         }
     ],
-    "autoload": {
-        "psr-4": {
-            "Cego\\phpstan\\": "src/"
-        }
-    },
     "autoload-dev": {
         "psr-4": {
             "Test\\": "test/"
