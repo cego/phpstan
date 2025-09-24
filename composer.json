@@ -17,13 +17,15 @@
         }
     },
     "require": {
-        "php": "^8.1",
+        "php": "^8.3",
         "phpstan/phpstan": "^2.0",
         "larastan/larastan": "^3.0",
-        "spatie/laravel-data": "^3.0|^4.0"
+        "spatie/laravel-data": "^3.0|^4.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "shipmonk/phpstan-baseline-per-identifier": "^2.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "^11.0",
+        "phpunit/phpunit": "^12.0",
         "cego/php-cs-fixer": "^2.0"
     }
 }
