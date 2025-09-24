@@ -1,12 +1,10 @@
 includes:
     - ./../../larastan/larastan/extension.neon
     - ./../../phpstan/phpstan-strict-rules/rules.neon
+    - ./../../../phpstan-baselines/_loader.neon
 
 parameters:
     level: 10
     tmpDir: .phpstan
-    checkUninitializedProperties: true
     strictRules:
       dynamicCallOnStaticMethod: false
-    includes:
-        - phpstan-baselines/_loader.neon
