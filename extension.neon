@@ -4,5 +4,5 @@ includes:
 parameters:
     level: 8
     tmpDir: .phpstan
-    stubFiles:
-        - stubs/Eloquent.stub
+    bootstrapFiles:
+        - bootstrap/eloquent.php
