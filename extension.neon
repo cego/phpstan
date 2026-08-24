@@ -3,6 +3,7 @@ includes:
 
 parameters:
     level: 8
+    checkOctaneCompatibility: true
     tmpDir: .phpstan
     bootstrapFiles:
         - bootstrap/eloquent.php
