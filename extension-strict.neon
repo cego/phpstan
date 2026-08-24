@@ -5,6 +5,7 @@ includes:
 
 parameters:
     level: 10
+    checkOctaneCompatibility: true
     tmpDir: .phpstan
     strictRules:
       dynamicCallOnStaticMethod: false
